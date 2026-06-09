@@ -93,61 +93,174 @@ function normalizeName(name: string): string {
 
 function findSkillByName(skills: SkillIndexItem[], skillName: string): SkillIndexItem | undefined {
   const wanted = normalizeName(skillName);
-
-  return skills.find((skill) => {
-    return normalizeName(skill.name) === wanted || normalizeName(skill.title) === wanted;
-  });
-}
-
-function scoreSkill(skill: SkillIndexItem, task: string): number {
-  const text = task.toLowerCase();
-  let score = 0;
-
-  const name = skill.name.toLowerCase();
-  const title = skill.title.toLowerCase();
-  const description = skill.description.toLowerCase();
-
-  if (text.includes(name)) {
-    score += 25;
-  }
-
-  if (text.includes(title)) {
-    score += 15;
-  }
-
-  for (const trigger of skill.triggers ?? []) {
-    const t = String(trigger).trim().toLowerCase();
-    if (t && text.includes(t)) {
-      score += 6;
-    }
-  }
-
-  for (const word of `${name} ${title} ${description}`.split(/[\s,;:()/_-]+/)) {
-    const clean = word.trim().toLowerCase();
-    if (clean.length >= 3 && text.includes(clean)) {
-      score += 1;
-    }
-  }
-
-  return score;
+  return skills.find((skill) => normalizeName(skill.name) === wanted || normalizeName(skill.title) === wanted);
 }
 
 function formatReferenceList(skill: SkillIndexItem): string {
   const refs = skill.references ?? [];
-
   if (refs.length === 0) {
     return "No supporting references listed.";
   }
-
-  return refs
-    .map((r) => `- ${r.id}: ${r.title} (${r.path})${r.description ? ` — ${r.description}` : ""}`)
-    .join("\n");
+  return refs.map((r) => `- ${r.id}: ${r.title} (${r.path})${r.description ? ` — ${r.description}` : ""}`).join("\n");
 }
+
+function uniqueStrings(values: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+
+  for (const value of values) {
+    const clean = value.trim().toLowerCase();
+    if (!clean || seen.has(clean)) {
+      continue;
+    }
+    seen.add(clean);
+    out.push(clean);
+  }
+
+  return out;
+}
+
+function extractChineseSpans(text: string): string[] {
+  return text.match(/[\u4e00-\u9fa5]{2,}/g) ?? [];
+}
+
+function generateChineseNgrams(span: string): string[] {
+  const out: string[] = [];
+
+  for (const n of [2, 3, 4]) {
+    if (span.length < n) {
+      continue;
+    }
+
+    for (let i = 0; i <= span.length - n; i += 1) {
+      out.push(span.slice(i, i + n));
+    }
+  }
+
+  return out;
+}
+
+function generateFallbackQueryTerms(task: string): string[] {
+  const text = task.toLowerCase();
+  const terms: string[] = [];
+
+  terms.push(text);
+
+  for (const token of text.match(/[a-z][a-z0-9.+#-]{1,}/gi) ?? []) {
+    if (token.length >= 2) {
+      terms.push(token);
+    }
+  }
+
+  for (const span of extractChineseSpans(task)) {
+    terms.push(span);
+    terms.push(...generateChineseNgrams(span));
+  }
+
+  return uniqueStrings(terms).slice(0, 80);
+}
+
+function buildQueryTerms(task: string, queryTerms?: string[]): string[] {
+  const modelTerms = (queryTerms ?? [])
+    .flatMap((term) => String(term).split(/[,，;；\n\r\t]+/))
+    .map((term) => term.trim())
+    .filter(Boolean);
+
+  const fallbackTerms = generateFallbackQueryTerms(task);
+  return uniqueStrings([...modelTerms, ...fallbackTerms]).slice(0, 120);
+}
+
+function skillSearchText(skill: SkillIndexItem): string {
+  return [skill.name, skill.title, skill.description, ...(skill.triggers ?? [])].join(" ").toLowerCase();
+}
+
+function scoreOneSkill(skill: SkillIndexItem, task: string, terms: string[]) {
+  const haystack = skillSearchText(skill);
+  const taskLower = task.toLowerCase();
+  const matchedTerms: string[] = [];
+  let score = 0;
+
+  if (taskLower.includes(skill.name.toLowerCase())) {
+    score += 80;
+    matchedTerms.push(skill.name);
+  }
+
+  if (taskLower.includes(skill.title.toLowerCase())) {
+    score += 35;
+    matchedTerms.push(skill.title);
+  }
+
+  for (const rawTerm of terms) {
+    const term = rawTerm.trim().toLowerCase();
+    if (!term) {
+      continue;
+    }
+
+    if (/^[\u4e00-\u9fa5]$/.test(term)) {
+      continue;
+    }
+
+    if (haystack.includes(term)) {
+      const weight =
+        term.length >= 8 ? 12 :
+        term.length >= 4 ? 8 :
+        term.length >= 2 ? 4 :
+        1;
+
+      score += weight;
+      matchedTerms.push(term);
+      continue;
+    }
+
+    const parts = term
+      .split(/[\s/_\-]+/)
+      .map((x) => x.trim())
+      .filter((x) => x.length >= 3);
+
+    let partHits = 0;
+    for (const part of parts) {
+      if (haystack.includes(part)) {
+        partHits += 1;
+      }
+    }
+
+    if (parts.length >= 2 && partHits >= 2) {
+      score += partHits * 3;
+      matchedTerms.push(term);
+    }
+  }
+
+  if (score > 0 && (skill.references ?? []).length > 0) {
+    score += 1;
+  }
+
+  return {
+    skill,
+    score,
+    matched_terms: uniqueStrings(matchedTerms).slice(0, 20)
+  };
+}
+
+function getTopCandidates(skills: SkillIndexItem[], task: string, queryTerms?: string[], topK?: number) {
+  const terms = buildQueryTerms(task, queryTerms);
+  const k = Math.max(1, Math.min(topK ?? 5, 10));
+
+  const ranked = skills
+    .map((skill) => scoreOneSkill(skill, task, terms))
+    .sort((a, b) => b.score - a.score || a.skill.name.localeCompare(b.skill.name));
+
+  return {
+    terms,
+    candidates: ranked.slice(0, k),
+    zeroScore: ranked.length > 0 && ranked[0].score <= 0
+  };
+}
+
 
 export class PersonalSkillsMCP extends McpAgent<Env> {
   server = new McpServer({
     name: "Personal Skills MCP",
-    version: "0.4.0-indexed"
+    version: "0.5.0-topk-router"
   });
 
   async init() {
@@ -156,7 +269,7 @@ export class PersonalSkillsMCP extends McpAgent<Env> {
       {
         title: "List indexed personal skills",
         description:
-          "List all reusable personal SKILL.md workflows from the generated skills/index.json manifest. This is lightweight and does not scan every SKILL.md at runtime.",
+          "List all reusable personal SKILL.md workflows from skills/index.json. This is mainly for debugging or browsing the full skill catalog.",
         annotations: { readOnlyHint: true }
       },
       async () => {
@@ -191,128 +304,62 @@ export class PersonalSkillsMCP extends McpAgent<Env> {
     this.server.registerTool(
       "skill",
       {
-        title: "Use the most relevant personal skill",
+        title: "Search personal skills and return top candidates",
         description:
-          "Use this tool when the user says 'call skill', 'use skill', '调用 skill', '使用 skill', or when the user's task may match one of the user's reusable personal SKILL.md workflows. This tool selects the most relevant skill from the generated index and loads only that SKILL.md.",
+          "Use this tool before answering when the user asks to use skill/调用 skill, or when the task may match a personal SKILL.md workflow. IMPORTANT: Before calling this tool, rewrite the user's task into concise bilingual search terms yourself and pass them in query_terms. Include synonyms, reversed Chinese word orders, likely user wording, domain terms, and English equivalents. This tool returns only the top candidate skills, not the full SKILL.md. After it returns, you must choose the best candidate semantically and then call get_skill(skill_name=...) before answering the user.",
         inputSchema: {
           task: z
             .string()
+            .describe("The user's original task or question. Preserve the full user intent here."),
+          query_terms: z
+            .array(z.string())
+            .optional()
             .describe(
-              "The user's current task, question, pasted log, paper-review request, writing request, literature-search request, or other instruction."
+              "Search terms generated by the model from the task before calling this tool. Include Chinese and English terms, synonyms, reversed word order variants, domain phrases, abbreviations, and likely skill-category words. Example for '检索文献，查 Cr2Te3 转变温度': ['检索', '文献', '检索文献', '文献检索', '查论文', '材料物性', '转变温度', '居里温度', '磁相变', 'literature search', 'material property', 'transition temperature', 'Curie temperature']."
             ),
-          preferred_skill: z
-            .string()
+          top_k: z
+            .number()
             .optional()
-            .describe("Optional: the exact skill name if the user explicitly named one, for example quick-lit."),
-          include_references: z
-            .boolean()
-            .optional()
-            .describe("Optional: set true when supporting reference files are likely needed.")
+            .describe("Number of candidate skills to return. Default 5. Use 3-5 for normal routing.")
         },
         annotations: { readOnlyHint: true }
       },
-      async ({ task, preferred_skill, include_references }) => {
+      async ({ task, query_terms, top_k }) => {
         const skills = await loadIndex(this.env);
+        const { terms, candidates, zeroScore } = getTopCandidates(skills, task, query_terms, top_k);
 
-        if (skills.length === 0) {
-          return {
-            content: [
-              {
-                type: "text",
-                text:
-                  "# No personal skills found\n\n" +
-                  "skills/index.json was loaded, but it contains no valid skill entries."
-              }
-            ]
-          };
-        }
-
-        const ranked = skills
-          .map((skill) => ({ skill, score: scoreSkill(skill, task) }))
-          .sort((a, b) => b.score - a.score);
-
-        let best: { skill: SkillIndexItem; score: number } | undefined;
-
-        if (preferred_skill) {
-          const named = findSkillByName(skills, preferred_skill);
-          if (named) {
-            best = { skill: named, score: 999 };
-          }
-        }
-
-        if (!best) {
-          best = ranked[0];
-        }
-
-        if (!best || best.score <= 0) {
-          return {
-            content: [
-              {
-                type: "text",
-                text:
-                  "# No matching personal skill found\n\n" +
-                  "No indexed SKILL.md workflow clearly matched the current task.\n\n" +
-                  `Current task:\n${task}\n\n` +
-                  "Available skills:\n" +
-                  skills.map((s) => `- ${s.name}: ${s.title} — ${s.description}`).join("\n") +
-                  "\n\nInstruction to assistant: Answer normally without applying a personal skill, unless the user explicitly names one."
-              }
-            ]
-          };
-        }
-
-        const skillText = await fetchText(joinRawUrl(this.env.SKILLS_RAW_BASE, best.skill.skill_path));
-
-        let referenceText = "";
-
-        if (include_references && best.skill.references && best.skill.references.length > 0) {
-          const refChunks: string[] = [];
-
-          for (const ref of best.skill.references) {
-            try {
-              const refText = await fetchText(joinRawUrl(this.env.SKILLS_RAW_BASE, ref.path));
-              refChunks.push(
-                `## Reference: ${ref.title}\n\n` +
-                  `ID: ${ref.id}\n` +
-                  `Source path: ${ref.path}\n\n` +
-                  refText
-              );
-            } catch (error) {
-              refChunks.push(
-                `## Reference: ${ref.title}\n\n` +
-                  `ID: ${ref.id}\n` +
-                  `Source path: ${ref.path}\n\n` +
-                  `Failed to fetch this reference: ${String(error)}`
-              );
-            }
-          }
-
-          referenceText = "\n\n--- SUPPORTING REFERENCES ---\n\n" + refChunks.join("\n\n---\n\n");
-        }
-
-        const candidateScores = ranked
-          .slice(0, 8)
-          .map((item) => `- ${item.skill.name}: score=${item.score}`)
-          .join("\n");
+        const compactCandidates = candidates.map((item, idx) => ({
+          rank: idx + 1,
+          name: item.skill.name,
+          title: item.skill.title,
+          description: item.skill.description,
+          score: item.score,
+          matched_terms: item.matched_terms,
+          references: (item.skill.references ?? []).map((r) => ({
+            id: r.id,
+            title: r.title
+          }))
+        }));
 
         return {
           content: [
             {
               type: "text",
               text:
-                `# Loaded personal skill: ${best.skill.title}\n\n` +
-                `Matched skill: ${best.skill.name}\n` +
-                `Match score: ${best.score}\n` +
-                `Source path: ${best.skill.skill_path}\n\n` +
-                `Candidate scores:\n${candidateScores}\n\n` +
+                `# Personal skill routing candidates\n\n` +
                 `Current task:\n${task}\n\n` +
-                `Available references:\n${formatReferenceList(best.skill)}\n\n` +
-                `--- SKILL.md ---\n\n` +
-                skillText +
-                referenceText +
-                "\n\n--- INSTRUCTION TO ASSISTANT ---\n\n" +
-                "Apply this SKILL.md workflow to the user's current task. " +
-                "If supporting references are needed but not included, call fetch_reference with the listed reference ID."
+                `Model-generated query terms used for retrieval:\n` +
+                terms.map((t) => `- ${t}`).join("\n") +
+                `\n\nTop candidate skills:\n` +
+                JSON.stringify(compactCandidates, null, 2) +
+                `\n\nRouting status: ${zeroScore ? "weak_or_no_lexical_match" : "candidates_found"}\n\n` +
+                `--- INSTRUCTION TO ASSISTANT ---\n\n` +
+                `Do not answer the user's task yet. ` +
+                `First, choose the best skill semantically from the candidate list above. ` +
+                `If a candidate clearly matches, call get_skill with that candidate's exact name. ` +
+                `If multiple candidates are plausible, prefer the one whose description best matches the user's immediate task, not the broadest one. ` +
+                `Only after get_skill returns the full SKILL.md should you answer the user. ` +
+                `If no candidate is semantically relevant, answer normally and briefly say no suitable personal skill was found.`
             }
           ]
         };
@@ -324,9 +371,9 @@ export class PersonalSkillsMCP extends McpAgent<Env> {
       {
         title: "Read one indexed SKILL.md workflow by name",
         description:
-          "Fetch the full SKILL.md instruction file for one named personal skill from the generated skills/index.json manifest. Use this when the user explicitly names a skill.",
+          "Fetch the full SKILL.md instruction file for one named personal skill from skills/index.json. Use this after the skill tool returns candidates and you choose the best skill, or when the user explicitly names a skill.",
         inputSchema: {
-          skill_name: z.string().describe("The skill name, for example quick-lit.")
+          skill_name: z.string().describe("The exact skill name, for example quick-lit.")
         },
         annotations: { readOnlyHint: true }
       },
