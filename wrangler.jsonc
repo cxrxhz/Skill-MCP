@@ -22,6 +22,6 @@
     "enabled": true
   },
   "vars": {
-    "SKILLS_RAW_BASE": "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/personal-skills-mcp/main/skills"
+    "SKILLS_RAW_BASE": "https://raw.githubusercontent.com/cxrxhz/Skill-MCP/main/skills"
   }
 }
