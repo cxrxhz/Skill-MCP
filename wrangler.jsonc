@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "personal-skills-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "migrations": [
+    {
+      "new_sqlite_classes": ["PersonalSkillsMCP"],
+      "tag": "v1"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "PersonalSkillsMCP",
+        "name": "MCP_OBJECT"
+      }
+    ]
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "SKILLS_RAW_BASE": "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/personal-skills-mcp/main/skills"
+  }
+}
