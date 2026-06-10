@@ -1,7 +1,7 @@
 ---
 name: research-review
 title: Web-Safe Research Review
-description: Critically review a research idea, paper draft, experiment plan, or results from the perspective of senior academic reviewers without relying on Codex MCP or external agent loops.
+description: Critically review a research idea, paper draft, experiment plan, or results from the perspective of senior academic reviewers without relying on local coding-assistant integration or external agent loops.
 triggers:
   - research review
   - review my research
@@ -17,13 +17,22 @@ triggers:
   - 批判性分析
 ---
 
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
+
 # Web-Safe Research Review
 
 ## Purpose
 
 Use this skill when the user wants critical feedback on a research idea, paper draft, experiment plan, experimental results, or scientific argument.
 
-This web-safe version does **not** call Codex MCP, external reviewers, local files, or multi-agent loops. It simulates a rigorous senior reviewer within the current ChatGPT conversation and produces structured, actionable review feedback.
+This web-safe version does **not** call local coding-assistant integration, external reviewers, local files, or multi-agent loops. It simulates a rigorous senior reviewer within the current ChatGPT conversation and produces structured, actionable review feedback.
 
 ## Operating Rules
 

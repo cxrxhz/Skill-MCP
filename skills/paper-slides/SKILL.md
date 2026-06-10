@@ -17,13 +17,22 @@ triggers:
   - 答辩
 ---
 
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
+
 # Web-Safe Paper Slides Planner
 
 ## Purpose
 
 Use this skill when the user wants to turn a paper, abstract, experiment, or research project into presentation slides, speaker notes, or a conference talk.
 
-This web-safe version does **not** assume access to LaTeX, Beamer, PPTX libraries, local files, Codex MCP, or a compiled paper directory. It produces slide outlines, per-slide content, speaker notes, timing plans, and optional Markdown/Beamer skeletons that the user can copy into PowerPoint, Keynote, Google Slides, or LaTeX.
+This web-safe version does **not** assume access to LaTeX, Beamer, PPTX libraries, local files, local coding-assistant integration, or a compiled paper directory. It produces slide outlines, per-slide content, speaker notes, timing plans, and optional Markdown/Beamer skeletons that the user can copy into PowerPoint, Keynote, Google Slides, or LaTeX.
 
 ## Operating Rules
 

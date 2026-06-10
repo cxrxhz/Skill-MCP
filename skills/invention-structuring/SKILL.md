@@ -2,8 +2,16 @@
 name: invention-structuring
 description: "Structure a raw invention idea into a formal invention disclosure. Use when user says \"构建发明\", \"structure invention\", \"发明构建\", \"invention disclosure\", or wants to formalize a rough idea into a patent-ready structure."
 argument-hint: [invention-description-or-brief-path]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, mcp__codex__codex
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Invention Structuring
 
@@ -110,10 +118,10 @@ Dependent Claim 5 → alternative implementation of feature A
 
 ### Step 6: Cross-Model Validation
 
-Call `REVIEWER_MODEL` via `mcp__codex__codex` with xhigh reasoning:
+Call `REVIEWER_MODEL` via `local coding assistant integration` with xhigh reasoning:
 
 ```
-mcp__codex__codex:
+local coding assistant integration:
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     You are a patent attorney reviewing an invention disclosure.
@@ -184,4 +192,4 @@ Write `patent/INVENTION_DISCLOSURE.md`:
 - The core inventive concept must be the minimum set of features for patentability.
 - Supporting features should be independently valuable -- each should provide a meaningful technical benefit even if other supporting features are removed.
 - Never invent embodiments that do not correspond to the actual invention or user-provided materials.
-- If `mcp__codex__codex` is not available, skip cross-model validation and note it in the output.
+- If `local coding assistant integration` is not available, skip cross-model validation and note it in the output.

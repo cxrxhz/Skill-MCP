@@ -2,8 +2,16 @@
 name: formula-derivation
 description: Structures and derives research formulas when the user wants to 推导公式, build a theory line, organize assumptions, turn scattered equations into a coherent derivation, or rewrite theory notes into a paper-ready formula document. Use when the derivation target is not yet fully fixed, the main object still needs to be chosen, or the user needs a coherent derivation package rather than a finished theorem proof.
 argument-hint: [problem-goal-current-formulas-or-notes]
-allowed-tools: Read, Write, Edit, Grep, Glob
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Formula Derivation: Research Theory Line Construction
 
@@ -90,7 +98,7 @@ If the current notes start from a narrower quantity, decide explicitly whether i
 - a local slice
 - an approximation
 
-Do not let a convenient proxy silently replace the actual conceptual object.
+Do not let a convenient proxy replace the actual conceptual object.
 
 ### Step 4: Normalize Assumptions and Notation
 Restate:
@@ -106,7 +114,7 @@ Identify:
 - whether the current formula chain already mixes exact steps with approximations
 
 Preserve the user's original notation unless a cleanup is necessary for coherence.
-If you adopt a cleaner internal formulation, keep that as a derivation device rather than silently replacing the user's target.
+If you adopt a cleaner internal formulation, keep that as a derivation device rather than replacing the user's target.
 
 ### Step 5: Classify the Derivation Steps
 For every nontrivial step, determine whether it is:
@@ -174,7 +182,7 @@ Before finishing the target derivation file, verify:
 - the invariant object is stable across the derivation
 - every assumption used is stated
 - each formula step is correctly labeled as identity / proposition / approximation / interpretation
-- the derivation does not silently switch objects
+- the derivation does not switch objects
 - special cases and general cases still belong to one theory line
 - boundaries and non-claims are stated
 

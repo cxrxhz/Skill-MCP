@@ -15,11 +15,20 @@ triggers:
   - 维护skills
 ---
 
-# Codex Skill Index Generator
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
+
+# local coding assistant Skill Index Generator
 
 ## Purpose
 
-Use this skill inside **Codex** when the user wants to generate or update `skills/index.json` for a Personal Skills MCP project.
+Use this skill inside **local coding assistant** when the user wants to generate or update `skills/index.json` for a Personal Skills MCP project.
 
 The goal is to maintain a lightweight manifest for ChatGPT web-side skill routing. The manifest allows the Cloudflare Worker to read only `skills/index.json`, choose the most relevant skill, and then fetch only the selected `SKILL.md`.
 
@@ -38,7 +47,7 @@ If it exists and is valid JSON:
 3. For any discovered skill whose `name` or `skill_path` already exists in the old index, **skip regenerating that entry**.
 4. Preserve the existing entry exactly, including its `title`, `description`, `triggers`, and `references`, unless the user explicitly asks to refresh or repair existing metadata.
 5. Only generate new index entries for newly added skill folders that are missing from the existing index.
-6. If an existing entry points to a missing `SKILL.md`, report it as stale; do not silently delete it unless the user asks for cleanup.
+6. If an existing entry points to a missing `SKILL.md`, report it as stale; do not delete it unless the user asks for cleanup.
 
 This makes normal updates fast: adding one new skill should only require reading and summarizing that new skill.
 

@@ -2,14 +2,22 @@
 name: specification-writing
 description: "Write the full patent specification from claims and invention disclosure. Use when user says \"撰写说明书\", \"write specification\", \"写说明书\", \"patent description\", or wants to draft the complete patent specification."
 argument-hint: [claims-path]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, Skill, WebSearch, WebFetch, mcp__codex__codex, mcp__codex__codex-reply
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Specification Writing: Section-by-Section Patent Description
 
 Write the patent specification based on: **$ARGUMENTS**
 
-Adapted from `/paper-write` for patent specifications. The specification supports the claims -- it is not a paper.
+Adapted from paper-write skill for patent specifications. The specification supports the claims -- it is not a paper.
 
 ## Constants
 
@@ -152,10 +160,10 @@ If any element lacks support, add the necessary description before proceeding.
 
 ### Step 10: Cross-Model Review
 
-Call `REVIEWER_MODEL` via `mcp__codex__codex` with xhigh reasoning:
+Call `REVIEWER_MODEL` via `local coding assistant integration` with xhigh reasoning:
 
 ```
-mcp__codex__codex:
+local coding assistant integration:
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     You are a patent examiner reviewing a specification for completeness.
@@ -206,5 +214,5 @@ Summary file: `patent/specification/SPECIFICATION_INDEX.md` with:
 - Reference numerals must be consistent: same component, same numeral, everywhere.
 - Background section describes specific deficiencies, not general "need for improvement."
 - Multiple embodiments strengthen the specification but are not always required.
-- Large file handling: if a Write operation fails, retry with Bash `cat <<'EOF'` heredoc.
-- If `mcp__codex__codex` is not available, skip cross-model review and note it in the output.
+- Large file handling: if a file output step fails, retry with local command execution `cat <<'EOF'` heredoc.
+- If `local coding assistant integration` is not available, skip cross-model review and note it in the output.

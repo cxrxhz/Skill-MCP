@@ -2,8 +2,16 @@
 name: writing-systems-papers
 description: "Paragraph-level structural blueprint for 10-12 page systems papers targeting OSDI, SOSP, ASPLOS, NSDI, and EuroSys. Provides page allocation, paragraph templates, and writing patterns. Use when user says \"写系统论文\", \"systems paper structure\", \"OSDI paper\", \"SOSP paper\", or wants fine-grained structural guidance for a systems conference submission."
 argument-hint: [venue-or-section]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, WebSearch, WebFetch, mcp__codex__codex, mcp__codex__codex-reply
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Writing Systems Papers: Paragraph-Level Blueprint
 
@@ -147,7 +155,7 @@ Based on 2025/2026 CFPs.
 10. Draft Related Work by methodology groups
 11. Draft Conclusion: 3 sentences
 12. Run pre-submission checklist
-13. Hand off to /paper-write for LaTeX generation and citation verification
+13. Hand off to paper-write skill for LaTeX generation and citation verification
 ```
 
 ---
@@ -161,14 +169,14 @@ Based on 2025/2026 CFPs.
 - [ ] Related work grouped by methodology
 - [ ] Page budget within venue limits
 - [ ] No fabricated observations, traces, or results
-- [ ] All citations verified (delegate to /paper-write)
+- [ ] All citations verified (delegate to paper-write skill)
 
 ---
 
 ## Academic Integrity
 
 - Never fabricate observations, traces, or experimental results
-- Never generate citations from memory — use /paper-write citation workflow
+- Never generate citations from memory — use paper-write skill citation workflow
 - Disclose LLM use per venue policy
 - This blueprint provides structural guidance, not copy-paste text
 

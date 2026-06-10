@@ -18,13 +18,22 @@ triggers:
   - 画架构图
 ---
 
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
+
 # Web-Safe Paper Illustration Designer
 
 ## Purpose
 
 Use this skill when the user wants to design a paper illustration, method figure, architecture diagram, visual abstract, pipeline figure, or image-generation prompt for an academic paper.
 
-This web-safe version does **not** call Gemini, image-generation APIs, local drawing tools, Bash, Codex MCP, or file-system operations. It produces a clear design specification, layout plan, diagram text, Mermaid/TikZ-style skeletons, and image-generation prompts that the user can copy into external tools.
+This web-safe version does **not** call Gemini, image-generation APIs, local drawing tools, local command execution, local coding-assistant integration, or file-system operations. It produces a clear design specification, layout plan, diagram text, Mermaid/TikZ-style skeletons, and image-generation prompts that the user can copy into external tools.
 
 ## Operating Rules
 

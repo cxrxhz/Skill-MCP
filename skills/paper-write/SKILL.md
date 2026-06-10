@@ -2,8 +2,16 @@
 name: paper-write
 description: "Draft LaTeX paper section by section from an outline. Use when user says \"写论文\", \"write paper\", \"draft LaTeX\", \"开始写\", or wants to generate LaTeX content from a paper plan."
 argument-hint: [venue-or-section]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, WebSearch, WebFetch, mcp__codex__codex, mcp__codex__codex-reply
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Paper Write: Section-by-Section LaTeX Generation
 
@@ -11,7 +19,7 @@ Draft a LaTeX paper based on: **$ARGUMENTS**
 
 ## Constants
 
-- **REVIEWER_MODEL = `gpt-5.4`** — Model used via Codex MCP for section review. Must be an OpenAI model.
+- **REVIEWER_MODEL = `gpt-5.4`** — Model used via local coding-assistant integration for section review. Must be an OpenAI model.
 - **TARGET_VENUE = `ICLR`** — Default venue. Supported: `ICLR`, `NeurIPS`, `ICML`, `CVPR` (also ICCV/ECCV), `ACL` (also EMNLP/NAACL), `AAAI`, `ACM` (ACM MM, SIGIR, KDD, CHI, etc.), `IEEE_JOURNAL` (IEEE Transactions / Letters, e.g., T-PAMI, JSAC, TWC, TCOM, TSP, TIP), `IEEE_CONF` (IEEE conferences, e.g., ICC, GLOBECOM, INFOCOM, ICASSP). Determines style file and formatting.
 - **ANONYMOUS = true** — If true, use anonymous author block. Set `false` for camera-ready. Note: most IEEE venues do NOT use anonymous submission — set `false` for IEEE.
 - **MAX_PAGES = 9** — Main body page limit. For ML conferences: counts from first page to end of Conclusion section, references and appendix NOT counted. **For IEEE venues: references ARE counted toward the page limit.** Typical limits: IEEE journal = no strict limit (but 12-14 pages typical for Transactions, 4-5 for Letters), IEEE conference = 5-8 pages including references.
@@ -19,13 +27,13 @@ Draft a LaTeX paper based on: **$ARGUMENTS**
 
 ## Inputs
 
-1. **PAPER_PLAN.md** — outline with claims-evidence matrix, section plan, figure plan (from `/paper-plan`)
+1. **PAPER_PLAN.md** — outline with claims-evidence matrix, section plan, figure plan (from paper-plan skill)
 2. **NARRATIVE_REPORT.md** — the research narrative (primary source of content)
-3. **Generated figures** — PDF/PNG files in `figures/` (from `/paper-figure`)
-4. **LaTeX includes** — `figures/latex_includes.tex` (from `/paper-figure`)
+3. **Generated figures** — PDF/PNG files in `figures/` (from paper-figure skill)
+4. **LaTeX includes** — `figures/latex_includes.tex` (from paper-figure skill)
 5. **Bibliography** — existing `.bib` file, or will create one
 
-If no PAPER_PLAN.md exists, ask the user to run `/paper-plan` first or provide a brief outline.
+If no PAPER_PLAN.md exists, ask the user to run paper-plan skill first or provide a brief outline.
 
 ## Orchestra-Guided Writing Overlay
 
@@ -104,7 +112,7 @@ paper/
 
 ### Step 0: Backup and Clean
 
-If `paper/` already exists, back up to `paper-backup-{timestamp}/` before overwriting. Never silently destroy existing work.
+If `paper/` already exists, back up to `paper-backup-{timestamp}/` before overwriting. Never destroy existing work.
 
 **CRITICAL: Clean stale files.** When changing section structure (e.g., 5 sections → 7 sections), delete section files that are no longer referenced by `main.tex`. Stale files (e.g., old `5_conclusion.tex` left behind when conclusion moved to `7_conclusion.tex`) cause confusion and waste space.
 
@@ -227,22 +235,22 @@ Three-step fallback chain — zero install, zero auth, all real BibTeX:
 **Step A: DBLP (best quality — full venue, pages, editors)**
 ```bash
 # 1. Search by title + first author
-curl -s "https://dblp.org/search/publ/api?q=TITLE+AUTHOR&format=json&h=3"
+HTTP request example -s "https://dblp.org/search/publ/api?q=TITLE+AUTHOR&format=json&h=3"
 # 2. Extract DBLP key from result (e.g., conf/nips/VaswaniSPUJGKP17)
 # 3. Fetch real BibTeX
-curl -s "https://dblp.org/rec/{key}.bib"
+HTTP request example -s "https://dblp.org/rec/{key}.bib"
 ```
 
 **Step B: CrossRef DOI (fallback — works for arXiv preprints)**
 ```bash
 # If paper has a DOI or arXiv ID (arXiv DOI = 10.48550/arXiv.{id})
-curl -sLH "Accept: application/x-bibtex" "https://doi.org/{doi}"
+HTTP request example -sLH "Accept: application/x-bibtex" "https://doi.org/{doi}"
 ```
 
 **Step C: Mark `[VERIFY]` (last resort)**
 If both DBLP and CrossRef return nothing, mark the entry with `% [VERIFY]` comment. Do NOT fabricate.
 
-**Why this matters:** LLM-generated BibTeX frequently hallucinates venue names, page numbers, or even co-authors. DBLP and CrossRef return publisher-verified metadata. Upstream skills (`/research-lit`, `/novelty-check`) may mention papers from LLM memory — this fetch chain is the gate that prevents hallucinated citations from entering the final `.bib`.
+**Why this matters:** LLM-generated BibTeX frequently hallucinates venue names, page numbers, or even co-authors. DBLP and CrossRef return publisher-verified metadata. Upstream skills (research-lit skill, novelty-check skill) may mention papers from LLM memory — this fetch chain is the gate that prevents hallucinated citations from entering the final `.bib`.
 
 If the DBLP/CrossRef flow is not enough, load `../shared-references/citation-discipline.md` for stricter fallback rules before adding placeholders.
 
@@ -328,10 +336,10 @@ Passive voice IS acceptable for: established facts, methods where agent is irrel
 
 ### Step 6: Cross-Review with REVIEWER_MODEL
 
-Send the complete draft to GPT-5.4 xhigh:
+Send the complete draft to a strong reviewer pass:
 
 ```
-mcp__codex__codex:
+local coding assistant integration:
   model: gpt-5.4
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
@@ -386,7 +394,7 @@ Before declaring done:
 
 ## Key Rules
 
-- **Large file handling**: If the Write tool fails due to file size, immediately retry using Bash (`cat << 'EOF' > file`) to write in chunks. Do NOT ask the user for permission — just do it silently.
+- **Large file handling**: If the file output step fails due to file size, immediately retry using local command execution (`cat << 'EOF' > file`) to write in chunks. Do not skip user-visible confirmation when the environment requires it.
 - **Do NOT generate author names, emails, or affiliations** — use anonymous block or placeholder
 - **Write complete sections, not outlines** — the output should be compilable LaTeX
 - **One file per section** — modular structure for easy editing

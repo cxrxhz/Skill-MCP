@@ -1,8 +1,16 @@
 ---
 name: research-refine
 description: 'Turn a vague research direction into a problem-anchored, elegant, frontier-aware, implementation-oriented method plan via iterative GPT-5.4 review. Use when the user says "refine my approach", "帮我细化方案", "decompose this problem", "打磨idea", "refine research plan", "细化研究方案", or wants a concrete research method that stays simple, focused, and top-venue ready instead of a vague or overbuilt idea.'
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Agent, mcp__codex__codex, mcp__codex__codex-reply
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Research Refine: Problem-Anchored, Elegant, Frontier-Aware Plan Refinement
 
@@ -23,17 +31,17 @@ Four principles dominate this skill:
 User input (PROBLEM + vague APPROACH)
   -> Phase 0 (Claude): Freeze Problem Anchor
   -> Phase 1 (Claude): Scan grounding papers -> identify technical gap -> choose the sharpest route -> write focused proposal
-  -> Phase 2 (Codex/GPT-5.4): Review for fidelity, specificity, contribution quality, and frontier leverage
+  -> Phase 2 (local coding assistant/a strong reviewer model): Review for fidelity, specificity, contribution quality, and frontier leverage
   -> Phase 3 (Claude): Anchor check + simplicity check -> revise method -> rewrite full proposal
-  -> Phase 4 (Codex, same thread): Re-evaluate revised proposal
+  -> Phase 4 (local coding assistant, same thread): Re-evaluate revised proposal
   -> Repeat Phase 3-4 until OVERALL SCORE >= 9 or MAX_ROUNDS reached
   -> Phase 5: Save full history to refine-logs/
-  -> Optional handoff: /experiment-plan for a detailed execution-ready experiment roadmap
+  -> Optional handoff: experiment-plan skill for a detailed execution-ready experiment roadmap
 ```
 
 ## Constants
 
-- **REVIEWER_MODEL = `gpt-5.4`** — Reviewer model used via Codex MCP.
+- **REVIEWER_MODEL = `gpt-5.4`** — Reviewer model used via local coding-assistant integration.
 - **MAX_ROUNDS = 5** — Maximum review-revise rounds.
 - **SCORE_THRESHOLD = 9** — Minimum overall score to stop.
 - **OUTPUT_DIR = `refine-logs/`** — Directory for round files and final report.
@@ -215,7 +223,7 @@ Additional rules:
 - Ensure one experiment block directly supports the **Problem Anchor**.
 - If complexity risk exists, include one **simplification or deletion check**.
 - If a frontier primitive is central, include one **necessity check** showing why that choice matters.
-- Default to **1-3 core experiment blocks** and leave the full execution roadmap to `/experiment-plan`.
+- Default to **1-3 core experiment blocks** and leave the full execution roadmap to experiment-plan skill.
 
 #### Step 1.6: Write the Initial Proposal
 
@@ -315,10 +323,10 @@ Use this structure:
 
 ### Phase 2: External Method Review (Round 1)
 
-Send the full proposal to GPT-5.4 for an **elegance-first, frontier-aware, method-first** review. The reviewer should spend most of the critique budget on the method itself, not on expanding the experiment menu.
+Send the full proposal to a strong reviewer model for an **elegance-first, frontier-aware, method-first** review. The reviewer should spend most of the critique budget on the method itself, not on expanding the experiment menu.
 
 ```
-mcp__codex__codex:
+local coding assistant integration:
   model: REVIEWER_MODEL
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
@@ -494,10 +502,10 @@ Save to `refine-logs/round-N-refinement.md`:
 
 ### Phase 4: Re-evaluation (Round 2+)
 
-Send the revised proposal back to GPT-5.4 in the **same thread**:
+Send the revised proposal back to a strong reviewer model in the **same thread**:
 
 ```
-mcp__codex__codex-reply:
+local coding assistant feedback integration:
   threadId: [saved from Phase 2]
   model: REVIEWER_MODEL
   config: {"model_reasoning_effort": "xhigh"}
@@ -645,14 +653,14 @@ If the final verdict is not READY, still write the best current final version he
 <details>
 <summary>Round 1 Review</summary>
 
-[Full verbatim response from GPT-5.4]
+[Full verbatim response from a strong reviewer model]
 
 </details>
 
 ...
 
 ## Next Steps
-- If READY: proceed to `/experiment-plan` for a full experiment roadmap, then `/run-experiment`
+- If READY: proceed to experiment-plan skill for a full experiment roadmap, then `/run-experiment`
 - If REVISE: manually address the remaining mechanism weaknesses, then re-run `/research-refine`
 - If RETHINK: revisit the core mechanism, possibly with `/idea-creator`
 ```
@@ -687,7 +695,7 @@ Remaining concerns:
 Review summary: refine-logs/REVIEW_SUMMARY.md
 Full report: refine-logs/REFINEMENT_REPORT.md
 Final proposal: refine-logs/FINAL_PROPOSAL.md
-Suggested next step: /experiment-plan
+Suggested next step: experiment-plan skill
 ```
 
 **Checkpoint:** Update `refine-logs/REFINE_STATE.json` with `{"phase": "done", "status": "completed", ...}`.
@@ -701,7 +709,7 @@ Suggested next step: /experiment-plan
 
 ## Key Rules
 
-- **Large file handling**: If the Write tool fails due to file size, immediately retry using Bash (`cat << 'EOF' > file`) to write in chunks. Do NOT ask the user for permission — just do it silently.
+- **Large file handling**: If the file output step fails due to file size, immediately retry using local command execution (`cat << 'EOF' > file`) to write in chunks. Do not skip user-visible confirmation when the environment requires it.
 
 - **Anchor first, every round.** Always carry forward the same Problem Anchor.
 - **One paper, one dominant contribution.** Avoid multiple parallel contributions unless the paper truly needs them.
@@ -711,8 +719,8 @@ Suggested next step: /experiment-plan
 - **Minimal experiments.** Inside this skill, experiments only need to prove the core claims.
 - **Review the mechanism, not the parts count.** A long module list is not novelty.
 - **Pushback is encouraged.** If reviewer feedback causes drift or unnecessary complexity, argue back with evidence.
-- **ALWAYS use `config: {"model_reasoning_effort": "xhigh"}`** for all Codex review calls.
-- **Save `threadId` from Phase 2** and use `mcp__codex__codex-reply` for later rounds.
+- **ALWAYS use `config: {"model_reasoning_effort": "xhigh"}`** for all local coding assistant review calls.
+- **Save `threadId` from Phase 2** and use `local coding assistant feedback integration` for later rounds.
 - **Do not fabricate results.** Only describe expected evidence and planned experiments.
 - **Be specific about compute and data assumptions.** Vague "we'll train a model" is not enough.
 - **Document everything.** Save every raw review, every anchor check, every simplicity check, and every major method change.
@@ -725,7 +733,7 @@ This skill sits between idea discovery and execution:
 /research-refine-pipeline              -> one-shot refine + experiment planning
 /idea-creator "direction"       -> candidate ideas
 /research-refine "PROBLEM: ... | APPROACH: ..."  <- you are here
-/experiment-plan                -> detailed experiment roadmap
+experiment-plan skill                -> detailed experiment roadmap
 /run-experiment                 -> execute the chosen method
 /auto-review-loop               -> iterate on results and paper
 ```
@@ -734,7 +742,7 @@ Typical flow:
 
 1. `/idea-creator` or local reading gives you a problem and a vague method direction
 2. `/research-refine` turns that into an anchored, elegant, frontier-aware method plan
-3. `/experiment-plan` turns the final proposal into a detailed claim-driven experiment roadmap
+3. experiment-plan skill turns the final proposal into a detailed claim-driven experiment roadmap
 4. `/research-refine-pipeline` is the one-shot wrapper when the user wants both stages in a single request
 5. `/run-experiment` executes the chosen runs
 6. Later loops operate on results, not just ideas

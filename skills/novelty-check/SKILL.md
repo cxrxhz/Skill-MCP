@@ -2,8 +2,16 @@
 name: novelty-check
 description: Verify research idea novelty against recent literature. Use when user says "查新", "novelty check", "有没有人做过", "check novelty", or wants to verify a research idea is novel before implementing.
 argument-hint: [method-or-idea-description]
-allowed-tools: WebSearch, WebFetch, Grep, Read, Glob, mcp__codex__codex
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Novelty Check Skill
 
@@ -11,7 +19,7 @@ Check whether a proposed method/idea has already been done in the literature: **
 
 ## Constants
 
-- REVIEWER_MODEL = `gpt-5.4` — Model used via Codex MCP. Must be an OpenAI model (e.g., `gpt-5.4`, `o3`, `gpt-4o`)
+- REVIEWER_MODEL = `gpt-5.4` — Model used via local coding-assistant integration. Must be an OpenAI model (e.g., `gpt-5.4`, `o3`, `gpt-4o`)
 
 ## Instructions
 
@@ -28,7 +36,7 @@ Given a method description, systematically verify its novelty:
 ### Phase B: Multi-Source Literature Search
 For EACH core claim, search using ALL available sources:
 
-1. **Web Search** (via `WebSearch`):
+1. **Web Search** (via `web search capability`):
    - Search arXiv, Google Scholar, Semantic Scholar
    - Use specific technical terms from the claim
    - Try at least 3 different query formulations per claim
@@ -38,10 +46,10 @@ For EACH core claim, search using ALL available sources:
    - ICLR 2025/2026, NeurIPS 2025, ICML 2025/2026
    - Recent arXiv preprints (2025-2026)
 
-3. **Read abstracts**: For each potentially overlapping paper, WebFetch its abstract and related work section
+3. **Read abstracts**: For each potentially overlapping paper, web page retrieval capability its abstract and related work section
 
 ### Phase C: Cross-Model Verification
-Call REVIEWER_MODEL via Codex MCP (`mcp__codex__codex`) with xhigh reasoning:
+Call REVIEWER_MODEL via local coding-assistant integration (`local coding assistant integration`) with xhigh reasoning:
 ```
 config: {"model_reasoning_effort": "xhigh"}
 ```

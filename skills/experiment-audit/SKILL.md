@@ -2,8 +2,16 @@
 name: experiment-audit
 description: "Audit experiment integrity before claiming results. Uses cross-model review (GPT-5.4) to check for fake ground truth, score normalization fraud, phantom results, and insufficient scope. Use when user says \"审计实验\", \"check experiment integrity\", \"audit results\", \"实验诚实度\", or after experiments complete before writing claims."
 argument-hint: [experiment-dir-or-results-path]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, mcp__codex__codex, mcp__codex__codex-reply
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Experiment Audit: Cross-Model Integrity Verification
 
@@ -21,13 +29,13 @@ These are NOT intentional deception — they are failure modes of optimizing age
 
 ## Core Principle
 
-**The executor (Claude) collects file paths. The reviewer (GPT-5.4) reads code and judges integrity. The executor does NOT participate in integrity judgment.**
+**The executor (Claude) collects file paths. The reviewer (a strong reviewer model) reads code and judges integrity. The executor does NOT participate in integrity judgment.**
 
 This follows `shared-references/reviewer-independence.md` and `shared-references/experiment-integrity.md`.
 
 ## Constants
 
-- **REVIEWER_BACKEND = `codex`** — Default: Codex MCP (xhigh). Override with `— reviewer: oracle-pro` for GPT-5.4 Pro via Oracle MCP. See `shared-references/reviewer-routing.md`.
+- **REVIEWER_BACKEND = `codex`** — Default: local coding-assistant integration (xhigh). Override with `— reviewer: oracle-pro` for a strong reviewer model Pro via Oracle MCP. See `shared-references/reviewer-routing.md`.
 
 ## Workflow
 
@@ -47,12 +55,12 @@ Scan project directory for:
 
 **DO NOT summarize, interpret, or explain any file content.** Only collect paths.
 
-### Step 2: Send to Reviewer (GPT-5.4 via Codex MCP)
+### Step 2: Send to Reviewer (a strong reviewer model via local coding-assistant integration)
 
 Pass ONLY file paths and the audit checklist to the reviewer. The reviewer reads everything directly.
 
 ```
-mcp__codex__codex:
+local coding assistant integration:
   model: gpt-5.4
   config: {"model_reasoning_effort": "xhigh"}
   sandbox: read-only
@@ -134,7 +142,7 @@ Parse the reviewer's response and write `EXPERIMENT_AUDIT.md`:
 # Experiment Audit Report
 
 **Date**: [today]
-**Auditor**: GPT-5.4 xhigh (cross-model, read-only)
+**Auditor**: a strong reviewer pass (cross-model, read-only)
 **Project**: [project name]
 
 ## Overall Verdict: [PASS | WARN | FAIL]
@@ -217,7 +225,7 @@ When integrated into the pipeline, this skill runs automatically after `/experim
 ```
 /experiment-bridge → results ready
     ↓
-/experiment-audit (automatic, advisory)
+experiment-audit skill (automatic, advisory)
     ├── PASS  → continue normally
     ├── WARN  → print ⚠️ warning, continue, tag claims as [INTEGRITY: WARN]
     └── FAIL  → print 🔴 alert, continue, tag claims as [INTEGRITY CONCERN]
@@ -240,7 +248,7 @@ else:
     mark as "provisional — no integrity audit"
 ```
 
-### Read by /paper-write (if exists)
+### Read by paper-write skill (if exists)
 
 ```
 if EXPERIMENT_AUDIT.json exists AND integrity_status == "fail":

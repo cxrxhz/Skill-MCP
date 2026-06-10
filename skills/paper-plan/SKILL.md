@@ -2,8 +2,16 @@
 name: paper-plan
 description: "Generate a structured paper outline from review conclusions and experiment results. Use when user says \"写大纲\", \"paper outline\", \"plan the paper\", \"论文规划\", or wants to create a paper plan before writing."
 argument-hint: [topic-or-narrative-doc]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, WebSearch, WebFetch, mcp__codex__codex, mcp__codex__codex-reply
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Paper Plan: From Review Conclusions to Paper Outline
 
@@ -11,8 +19,8 @@ Generate a structured, section-by-section paper outline from: **$ARGUMENTS**
 
 ## Constants
 
-- **REVIEWER_MODEL = `gpt-5.4`** — Model used via Codex MCP for outline review. Must be an OpenAI model.
-- **TARGET_VENUE = `ICLR`** — Default venue. User can override (e.g., `/paper-plan "topic" — venue: NeurIPS`). Supported: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences).
+- **REVIEWER_MODEL = `gpt-5.4`** — Model used via local coding-assistant integration for outline review. Must be an OpenAI model.
+- **TARGET_VENUE = `ICLR`** — Default venue. User can override (e.g., paper-plan skill "topic" — venue: NeurIPS`). Supported: `ICLR`, `NeurIPS`, `ICML`, `CVPR`, `ACL`, `AAAI`, `ACM`, `IEEE_JOURNAL` (IEEE Transactions / Letters), `IEEE_CONF` (IEEE conferences).
 - **MAX_PAGES** — Page limit. For ML conferences: main body to Conclusion end (excluding references, appendix). ICLR=9, NeurIPS=9, ICML=8. **For IEEE venues: references ARE included in page count.** IEEE journal Transactions ≈ 12-14 pages total, Letters ≈ 4-5 pages total; IEEE conference ≈ 5-8 pages total (including references).
 
 ## Inputs
@@ -207,10 +215,10 @@ For each section, list required citations:
 
 ### Step 6: Cross-Review with REVIEWER_MODEL
 
-Send the complete outline to GPT-5.4 xhigh for feedback:
+Send the complete outline to a strong reviewer pass for feedback:
 
 ```
-mcp__codex__codex:
+local coding assistant integration:
   model: gpt-5.4
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
@@ -262,13 +270,13 @@ Save the final outline to `PAPER_PLAN.md` in the project root:
 [from Step 6, summarized]
 
 ## Next Steps
-- [ ] /paper-figure to generate all figures
-- [ ] /paper-write to draft LaTeX
+- [ ] paper-figure skill to generate all figures
+- [ ] paper-write skill to draft LaTeX
 - [ ] /paper-compile to build PDF
 ```
 
 ## Key Rules
-- **Large file handling**: If the Write tool fails due to file size, immediately retry using Bash (`cat << 'EOF' > file`) to write in chunks. Do NOT ask the user for permission — just do it silently.
+- **Large file handling**: If the file output step fails due to file size, immediately retry using local command execution (`cat << 'EOF' > file`) to write in chunks. Do not skip user-visible confirmation when the environment requires it.
 - **Do NOT generate author information** — leave author block as placeholder or anonymous
 - **Be honest about evidence gaps** — mark claims as "needs experiment" rather than overclaiming
 - **Page budget is hard** — if content exceeds MAX_PAGES, suggest what to move to appendix

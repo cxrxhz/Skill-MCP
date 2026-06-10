@@ -1,8 +1,16 @@
 ---
 name: experiment-plan
 description: 'Turn a refined research proposal or method idea into a detailed, claim-driven experiment roadmap. Use after `research-refine`, or when the user asks for a detailed experiment plan, ablation matrix, evaluation protocol, run order, compute budget, or paper-ready validation that supports the core problem, novelty, simplicity, and any LLM / VLM / Diffusion / RL-based contribution.'
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch, Agent
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Experiment Plan: Claim-Driven, Paper-Oriented Validation
 
@@ -227,7 +235,7 @@ Tracker file: refine-logs/EXPERIMENT_TRACKER.md
 
 ## Key Rules
 
-- **Large file handling**: If the Write tool fails due to file size, immediately retry using Bash (`cat << 'EOF' > file`) to write in chunks. Do NOT ask the user for permission — just do it silently.
+- **Large file handling**: If the file output step fails due to file size, immediately retry using local command execution (`cat << 'EOF' > file`) to write in chunks. Do not skip user-visible confirmation when the environment requires it.
 
 - **Every experiment must defend a claim.** If it does not change a reviewer belief, cut it.
 - **Prefer a compact paper story.** Design the main table first, then add only the ablations that defend it.
@@ -243,7 +251,7 @@ Tracker file: refine-logs/EXPERIMENT_TRACKER.md
 ```
 /research-refine-pipeline -> one-shot method + experiment planning
 /research-refine   -> method and claim refinement
-/experiment-plan   -> detailed experiment roadmap
+experiment-plan skill   -> detailed experiment roadmap
 /run-experiment    -> execute the runs
 /auto-review-loop  -> react to results and iterate on the paper
 ```

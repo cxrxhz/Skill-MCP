@@ -18,13 +18,22 @@ triggers:
   - 可视化
 ---
 
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
+
 # Web-Safe Paper Figure Planner
 
 ## Purpose
 
 Use this skill when the user wants to design, plan, critique, or specify figures and tables for an academic paper, especially from experimental results, ablation studies, benchmark comparisons, training curves, or qualitative examples.
 
-This web-safe version does **not** assume access to local files, Bash, Python execution, LaTeX compilation, Codex MCP, or a project directory. It produces structured figure plans, plotting specifications, captions, table designs, and optional code snippets that the user can copy into their own environment.
+This web-safe version does **not** assume access to local files, local command execution, Python execution, LaTeX compilation, local coding-assistant integration, or a project directory. It produces structured figure plans, plotting specifications, captions, table designs, and optional code snippets that the user can copy into their own environment.
 
 ## Operating Rules
 

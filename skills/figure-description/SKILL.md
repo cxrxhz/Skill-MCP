@@ -2,14 +2,22 @@
 name: figure-description
 description: "Process user-provided patent figures and generate formal drawing descriptions. Use when user says \"附图处理\", \"figure description\", \"附图说明\", \"drawings description\", or wants to describe patent figures with reference numerals."
 argument-hint: [figure-directory-or-figure-list]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Figure Description for Patents
 
 Process patent figures and generate drawing descriptions based on: **$ARGUMENTS**
 
-Unlike `/paper-figure` which generates data plots, this skill processes user-provided technical diagrams and assigns reference numerals.
+Unlike paper-figure skill which generates data plots, this skill processes user-provided technical diagrams and assigns reference numerals.
 
 ## Constants
 

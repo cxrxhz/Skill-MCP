@@ -2,8 +2,16 @@
 name: paper-claim-audit
 description: "Zero-context verification that every number, comparison, and scope claim in the paper matches raw result files. Uses a fresh cross-model reviewer with NO prior context to prevent confirmation bias. Use when user says \"审查论文数据\", \"check paper claims\", \"verify numbers\", \"论文数字核对\", or before submission to ensure paper-to-evidence fidelity."
 argument-hint: [paper-directory]
-allowed-tools: Bash(*), Read, Write, Edit, Grep, Glob, Agent, mcp__codex__codex
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Paper Claim Audit: Zero-Context Evidence Verification
 
@@ -23,7 +31,7 @@ A **fresh reviewer with zero prior context** catches these because it has no exp
 
 | Skill | Question it answers |
 |-------|-------------------|
-| `/experiment-audit` | Is the experiment code honest? (fake GT, normalization fraud) |
+| experiment-audit skill | Is the experiment code honest? (fake GT, normalization fraud) |
 | `/result-to-claim` | Does the data scientifically support this claim? |
 | **`/paper-claim-audit`** | **Does the paper report the data truthfully and precisely?** |
 
@@ -73,12 +81,12 @@ NARRATIVE_REPORT.md, PAPER_PLAN.md, findings.md
 Any .md file that is an executor-written summary
 ```
 
-### Step 2: Fresh Reviewer Audit (GPT-5.4 — NEW thread, no reply)
+### Step 2: Fresh Reviewer Audit (a strong reviewer model — NEW thread, no reply)
 
-**CRITICAL: Use `mcp__codex__codex` (new thread), NEVER `mcp__codex__codex-reply`.** Every run must be a fresh context.
+**CRITICAL: Use `local coding assistant integration` (new thread), NEVER `local coding assistant feedback integration`.** Every run must be a fresh context.
 
 ```
-mcp__codex__codex:
+local coding assistant integration:
   model: gpt-5.4
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
@@ -160,7 +168,7 @@ Parse the reviewer's response and write `PAPER_CLAIM_AUDIT.md`:
 # Paper Claim Audit Report
 
 **Date**: [today]
-**Auditor**: GPT-5.4 xhigh (fresh zero-context thread)
+**Auditor**: a strong reviewer pass (fresh zero-context thread)
 **Paper**: [paper title from tex]
 
 ## Overall Verdict: [PASS | WARN | FAIL]
@@ -210,7 +218,7 @@ Also write `PAPER_CLAIM_AUDIT.json` for machine consumption.
 
 ## When to Run
 
-1. **After `/paper-write`** — first check before improvement loop
+1. **After paper-write skill** — first check before improvement loop
 2. **After `/auto-paper-improvement-loop`** — recheck if improvement loop changed numbers
 3. **Before submission** — final verification
 
@@ -226,7 +234,7 @@ if PAPER_CLAIM_AUDIT.json exists:
 
 ### Advisory, Never Blocking
 
-Same pattern as `/experiment-audit`:
+Same pattern as experiment-audit skill:
 - `PASS` → continue normally
 - `WARN` → print warning, continue, flag draft as "check numbers before submission"
 - `FAIL` → print alert, continue, but do NOT mark as submission-ready

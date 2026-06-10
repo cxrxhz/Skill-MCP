@@ -1,13 +1,21 @@
 ---
 name: result-to-claim
-description: Use when experiments complete to judge what claims the results support, what they don't, and what evidence is still missing. Codex MCP evaluates results against intended claims and routes to next action (pivot, supplement, or confirm). Use after experiments finish — before writing the paper or running ablations.
+description: Use when experiments complete to judge what claims the results support, what they don't, and what evidence is still missing. local coding-assistant integration evaluates results against intended claims and routes to next action (pivot, supplement, or confirm). Use after experiments finish — before writing the paper or running ablations.
 argument-hint: [experiment-description-or-wandb-run]
-allowed-tools: Bash(*), Read, Grep, Glob, Write, Edit, mcp__codex__codex, mcp__codex__codex-reply
 ---
+
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
 
 # Result-to-Claim Gate
 
-Experiments produce numbers; this gate decides what those numbers *mean*. Collect results from available sources, get a Codex judgment, then auto-route based on the verdict.
+Experiments produce numbers; this gate decides what those numbers *mean*. Collect results from available sources, get a local coding assistant judgment, then auto-route based on the verdict.
 
 ## Context: $ARGUMENTS
 
@@ -35,12 +43,12 @@ Assemble the key information:
 - The intended claim these experiments were designed to test
 - Any known confounds or caveats
 
-### Step 2: Codex Judgment
+### Step 2: local coding assistant Judgment
 
-Send the collected results to Codex for objective evaluation:
+Send the collected results to local coding assistant for objective evaluation:
 
 ```
-mcp__codex__codex:
+local coding assistant integration:
   config: {"model_reasoning_effort": "xhigh"}
   prompt: |
     RESULT-TO-CLAIM EVALUATION
@@ -76,7 +84,7 @@ mcp__codex__codex:
 
 ### Step 3: Parse and Normalize
 
-Extract structured fields from Codex response:
+Extract structured fields from local coding assistant response:
 
 ```markdown
 - claim_supported: yes | partial | no
@@ -100,7 +108,7 @@ if EXPERIMENT_AUDIT.json exists:
 
     if integrity_status == "fail":
         append to verdict: "[INTEGRITY CONCERN] — audit found issues, see EXPERIMENT_AUDIT.md"
-        downgrade confidence to "low" regardless of Codex judgment
+        downgrade confidence to "low" regardless of local coding assistant judgment
 
     if integrity_status == "warn":
         append to verdict: "[INTEGRITY: WARN] — audit flagged potential issues"
@@ -178,9 +186,9 @@ if research-wiki/ exists:
 
 ## Rules
 
-- **Codex is the judge, not CC.** CC collects evidence and routes; Codex evaluates. This prevents post-hoc rationalization.
-- Do not inflate claims beyond what the data supports. If Codex says "partial", do not round up to "yes".
+- **local coding assistant is the judge, not CC.** CC collects evidence and routes; local coding assistant evaluates. This prevents post-hoc rationalization.
+- Do not inflate claims beyond what the data supports. If local coding assistant says "partial", do not round up to "yes".
 - A single positive result on one dataset does not support a general claim. Be honest about scope.
 - If `confidence` is low, treat the judgment as inconclusive and add experiments rather than committing to a claim.
-- If Codex MCP is unavailable (call fails), CC makes its own judgment and marks it `[pending Codex review]` — do not block the pipeline.
+- If local coding-assistant integration is unavailable (call fails), CC makes its own judgment and marks it `[pending local coding assistant review]` — do not block the pipeline.
 - Always record the verdict and reasoning in findings.md, regardless of outcome.

@@ -1,7 +1,7 @@
 ---
 name: patent-review
 title: Web-Safe Patent Review
-description: Simulate a patent examiner-style review of claims, specification, embodiments, figures, and prior-art risks without relying on Codex MCP or local patent files.
+description: Simulate a patent examiner-style review of claims, specification, embodiments, figures, and prior-art risks without relying on local coding-assistant integration or local patent files.
 triggers:
   - patent review
   - examiner review
@@ -16,13 +16,22 @@ triggers:
   - 说明书
 ---
 
+## Web-side execution adapter
+
+- This skill is workflow guidance for the ChatGPT web-side connector.
+- Loading this SKILL.md is only the setup step; it does not mean the task is complete.
+- After loading, continue to execute the workflow, constraints, and output format below before answering.
+- Mentions of local automation, local file operations, local command execution, or external integrations are descriptive only. Use capabilities available in the current ChatGPT session, or ask the user for needed files/links.
+- For literature search, current facts, factual verification, source tracing, numeric values, material properties, legal/medical/financial/current information, or any evidence-heavy claim: use available search/browsing tools first and cite verifiable sources. Do not answer such tasks only from memory.
+- Preserve the original workflow and scope unless the user explicitly asks for changes.
+
 # Web-Safe Patent Review
 
 ## Purpose
 
 Use this skill when the user wants a patent examiner-style review of patent claims, specification text, embodiments, figure descriptions, prior-art risks, clarity, enablement, or claim support.
 
-This web-safe version does **not** call Codex MCP, read local patent directories, search proprietary databases, or issue legal advice. It provides a structured drafting and review aid based on the material the user provides. For legal filing decisions, the user should consult a qualified patent professional.
+This web-safe version does **not** call local coding-assistant integration, read local patent directories, search proprietary databases, or issue legal advice. It provides a structured drafting and review aid based on the material the user provides. For legal filing decisions, the user should consult a qualified patent professional.
 
 ## Operating Rules
 
